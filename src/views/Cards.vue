@@ -1,12 +1,10 @@
 <template lang="">
     <div>
         <ul>
-            <!-- <li v-for="(card, index) in cards" :key="index">
-                <a :href="card.url" target="_blank">{{ card.name }}</a>
-            </li> -->
             <Card 
                 v-for="(card, index) in cards"
                 :key="index"
+                :img="card.img"
                 :name="card.name"
                 :url="card.url"
             />
@@ -15,7 +13,7 @@
 </template>
 
 <script lang="">
-    import Card from './Card.vue';
+    import Card from '../components/Card.vue';
 
     export default {
         name: 'Cards',
@@ -30,5 +28,9 @@
     }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+    }
 </style>

@@ -6,32 +6,62 @@
 
     <SearchForm formTitle="Cerca per tipo" placeholder="Inserisci il tipo" @sendSearch="getPokemonByType" />
 
-    <Cards :cards="pokemon" />
+    <Cards
+         :cards="pokemon" 
+         class="cardsPokemon"
+      />
+
+    <BaseInput  
+        class="backBtn"
+        v-if="customSearch"
+        type="submit"
+        value="Indietro"
+        @click="getAllPokemon"
+    />
   </div>
 </template>
 
 <script>
 import Cards from './views/Cards.vue';
 import SearchForm from './components/SearchForm.vue';
+import BaseInput from './components/BaseInput.vue';
 
 export default {
   name: "App",
   components: {
     Cards,
-    SearchForm
+    SearchForm,
+    BaseInput
   },
   data() {
       return {
           pokemon: [],
+          customSearch: false,
       }
   },
   methods: {
     getAllPokemon() {
-     this.axios
-        .get(`${this.base_url}/pokemon`)
-        .then( (response) => {
-          this.pokemon = response.data.results;
+
+      this.pokemon = [];
+      this.axios
+          .get(`${this.base_url}/pokemon`)
+          .then( (response) => {
+
+            response.data.results.forEach( (element) => {
+              const pokeUrl = element.url.split('/');
+              const pokeId = pokeUrl[pokeUrl.length - 2];
+
+              this.pokemon.push({
+                ...element,
+                img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokeId}.svg`,
+              });
+
+            } );
+            // this.pokemon = response.data.results;
+            console.log(this.pokemon);
         });
+
+        this.customSearch = false;
     },
 
     getPokemonByName(text) {
@@ -45,11 +75,15 @@ export default {
           this.pokemon = [
             {
               name: poke.name,
-              url: poke.species.url
+              url: poke.species.url,
+              img: poke.sprites.other.dream_world.front_default,
             }
           ];
 
-        } )
+        } );
+
+      this.customSearch = true;
+
     },
 
     getPokemonByType(text) {
@@ -58,16 +92,22 @@ export default {
       this.axios
         .get(`${this.base_url}/type/${pokeType}`)
         .then( (response) => {
-
+          
           const poke = response.data.pokemon.map( (element) => {
+            const pokeUrl = element.pokemon.url.split('/');
+            const pokeId = pokeUrl[pokeUrl.length - 2];
+
             return {
               name: element.pokemon.name,
-              url: element.pokemon.url
+              url: element.pokemon.url,
+              img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokeId}.svg`,
             }
           } );
-
           this.pokemon = poke;
         } );
+
+      this.customSearch = true;
+
     },
     
   },
@@ -78,6 +118,9 @@ export default {
 </script>
 
 <style lang="scss">
+@import './scss/_variables.scss';
+@import './scss/_common.scss';
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -85,10 +128,17 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+
+  .backBtn {
+    padding: 20px;
+    border: 0;
+    background: #f71616;
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+  }
+
+
 }
 
-ul {
-  padding: 0;
-  list-style: none;
-}
 </style>
